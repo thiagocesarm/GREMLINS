@@ -29,6 +29,8 @@ void * SLPool::Allocate( size_t numberOfBytes)
     Block * work = mr_Sentinel.mp_Next;
     Block * work_prev = &mr_Sentinel;
     
+    #ifndef _BEST_FIT_
+    
     while(work != nullptr and work->mui_Length < numberOfBlocks)
     {
         work_prev = work;
@@ -56,10 +58,81 @@ void * SLPool::Allocate( size_t numberOfBytes)
     }
     
     return work + sizeof(Header);
+    
+    #endif
+    
+    #ifdef _BEST_FIT_
+    
+    Block * best_ptr (work);
+    Block * best_ptr_prev (&mr_Sentinel);
+    
+    while(work != nullptr)
+    {
+        if(work->mui_Length < best_ptr->mui_Length and work->mui_Length >= numberOfBlocks)
+        {
+            best_ptr = work;
+            best_ptr_prev = work_prev;
+        }
+        work_prev = work;
+        work = work->mp_Next;
+    }
+    
+    if(best_ptr->mui_Length < numberOfBlocks)
+    {
+        std::bad_alloc exception;
+        throw exception;
+    }
+    
+    if( best_ptr->mui_Length == numberOfBlocks )
+    {
+        best_ptr_prev->mp_Next = best_ptr->mp_Next;
+    }
+    else
+    {
+        Block * best_ptr_next = best_ptr + ( sizeof(Block) * numberOfBlocks );
+        best_ptr_next->mui_Length = best_ptr->mui_Length - numberOfBlocks;
+        best_ptr_next->mp_Next = best_ptr->mp_Next;
+        best_ptr_prev->mp_Next = best_ptr_next;
+        best_ptr->mui_Length = numberOfBlocks;
+    }
 
+    return best_ptr + sizeof(Header);
+    
+    #endif
 }
 
-void SLPool::Free( void * )
+void SLPool::Free( void * ptDelete )
 {
-    
+    Block * ptPrevReserved = &mr_Sentinel;
+    Block * ptPostReserved = mr_Sentinel.mp_Next;
+    Block * ptReserved = reinterpret_cast<Block*> (ptDelete);
+    while(ptPostReserved != nullptr and ptPostReserved < ptReserved)
+    {
+        ptPrevReserved = ptPostReserved;
+        ptPostReserved = ptPostReserved->mp_Next;
+    }
+    if (ptPrevReserved + (sizeof(Block) * ptPrevReserved->mui_Length) == ptReserved 
+        and ptReserved + (sizeof(Block) * ptReserved->mui_Length) == ptPostReserved)
+    {
+        ptPrevReserved->mui_Length += ptPostReserved->mui_Length + ptReserved->mui_Length;
+        ptPrevReserved->mp_Next = ptPostReserved->mp_Next;
+    }
+    else if (ptPrevReserved + (sizeof(Block) * ptPrevReserved->mui_Length) != ptReserved 
+            and ptReserved + (sizeof(Block) * ptReserved->mui_Length) != ptPostReserved)
+    {
+        ptPrevReserved->mp_Next = ptReserved;
+        ptReserved->mp_Next = ptPostReserved;
+    }
+    else if (ptPrevReserved + (sizeof(Block) * ptPrevReserved->mui_Length) == ptReserved 
+            and ptReserved + (sizeof(Block) * ptReserved->mui_Length) != ptPostReserved)
+    {
+        ptPrevReserved->mui_Length += ptReserved->mui_Length;
+        ptPrevReserved->mp_Next = ptPostReserved;
+    }
+    else
+    {
+        ptReserved->mui_Length += ptPostReserved->mui_Length;
+        ptPrevReserved->mp_Next = ptReserved;
+        ptReserved->mp_Next = ptPostReserved->mp_Next;
+    }
 }
