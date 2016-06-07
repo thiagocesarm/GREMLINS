@@ -23,7 +23,7 @@ CC = g++
 # FOR CLEANING
 RM = /bin/rm
 # WARNING FLAG
-WARN = -Wall
+# WARN = -Wall
 # DEBUG FLAGS
 DEBUG = -g
 # LINKING FLAGS

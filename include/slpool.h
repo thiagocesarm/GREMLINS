@@ -13,7 +13,7 @@
 #include "mempool_common.h"
 
 // Definition of the raw area's size within the block.
-#define SIZE 4
+#define SIZE 16
 
 /*!
  *	@brief SLPool class.
@@ -82,8 +82,11 @@ class SLPool : public StoragePool
     		
     		_os << "\n";
     		
+    		char square_block = 254;
+    		
     		while( i < _pool.mui_NumberOfBlocks )
     		{
+    		    
     		    if( work == &_pool.mp_Pool[i] )
     		    {
     		        for( auto j(0u); j < _pool.mp_Pool[i].mui_Length; j++)
@@ -93,10 +96,13 @@ class SLPool : public StoragePool
     		    else
     		    {
     		        for( auto j(0u); j < _pool.mp_Pool[i].mui_Length; j++)
-    		            _os << "[#]";
+    		            _os << "[■]";
     		    }
     		    
                 i += _pool.mp_Pool[i].mui_Length;
+                
+    		    if( i != _pool.mui_NumberOfBlocks )
+                    _os << " ~ ";
     		}
     
     		_os << "\n\n";
@@ -113,9 +119,6 @@ class SLPool : public StoragePool
          * free area nearby.
          */
         void Free( void * );
-        
-        
-        
 };
 
 
