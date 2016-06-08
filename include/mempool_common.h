@@ -1,12 +1,20 @@
+/*!
+ *	@file mempool_common.h
+ *
+ *  File with the operators new e delete overloaded.
+ */
+
 #ifndef _MEMPOOL_
 #define _MEMPOOL_
 
 #include "storagepool.h"
-#include "slpool.h"
-#include <iostream>
 
 struct Tag 
 { StoragePool * pool; };
+
+// ---------------------------------------------------
+//      OVERLOAD OF new AND delete OPERATORS
+// ---------------------------------------------------
 
 void * operator new ( size_t bytes , StoragePool & p ) 
 {
@@ -30,15 +38,20 @@ void operator delete ( void * arg ) noexcept
     // points to the raw data ( second block of information ).
     // The pool id ( tag ) is located ‘ sizeof ( Tag ) ’ bytes before.
     Tag * const tag = reinterpret_cast<Tag*>( arg ) - 1U;
+    
     if ( nullptr != tag->pool ) // Memory block belongs to a particular GM.
     {
         tag->pool->Free( tag );
     }
-    else
+    else // Memory block belongs to the operational system.
     {
         std::free ( tag );
-    }// Memory block belongs to the operational system.
+    }
 }
+
+// ---------------------------------------------------
+//      OVERLOAD OF new[] AND delete[] OPERATORS
+// ---------------------------------------------------
 
 void * operator new[] ( size_t bytes , StoragePool & p ) 
 {
@@ -66,10 +79,10 @@ void operator delete[] ( void * arg ) noexcept
     {
         tag->pool->Free( tag );
     }
-    else
+    else // Memory block belongs to the operational system.
     {
         std::free ( tag );
-    }// Memory block belongs to the operational system.
+    }
 }
 
 #endif

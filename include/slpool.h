@@ -3,13 +3,10 @@
  *
  *  File with the SLPool class.
  */
- 
-#include <iostream>
 
 #ifndef _SLPOOL_
 #define _SLPOOL_
 
-#include "storagepool.h"
 #include "mempool_common.h"
 
 // Definition of the raw area's size within the block.
@@ -79,11 +76,9 @@ class SLPool : public StoragePool
         {
             auto i(0u);
     		Block * work = _pool.mr_Sentinel.mp_Next;
-    		
-    		_os << "\n";
-    		
     		char square_block = 254;
     		
+    		_os << "\n";
     		while( i < _pool.mui_NumberOfBlocks )
     		{
     		    
@@ -91,14 +86,13 @@ class SLPool : public StoragePool
     		    {
     		        for( auto j(0u); j < _pool.mp_Pool[i].mui_Length; j++)
     		            _os << "[ ]";
-    		            work = work->mp_Next;
+    		        work = work->mp_Next;
     		    }
     		    else
     		    {
     		        for( auto j(0u); j < _pool.mp_Pool[i].mui_Length; j++)
     		            _os << "[■]";
     		    }
-    		    
                 i += _pool.mp_Pool[i].mui_Length;
                 
     		    if( i != _pool.mui_NumberOfBlocks )
@@ -119,6 +113,9 @@ class SLPool : public StoragePool
          * free area nearby.
          */
         void Free( void * );
+        
+        // Says whether if there are no free areas within the pool
+        bool isFull () { return (mr_Sentinel.mp_Next == nullptr); }
 };
 
 

@@ -4,11 +4,6 @@
  *  File with the SLPool class' methods implementation.
  */
  
-#include <cmath>
-#include <iostream>
-#include <stdexcept>
-#include <new>
-#include "slpool.h"
 
 
 /*!
@@ -19,6 +14,8 @@
  *	needed, then creates a dinamically allocated Block array at mp_Pool and 
  *  sets the last block (an extra) to the be the "head" of a free area list.
  */
+#include "header.h"
+
 SLPool::SLPool( size_t poolSz ) :
     mui_NumberOfBlocks( ceil( poolSz / static_cast<float>(SIZE) ) ),
     mp_Pool ( new Block[mui_NumberOfBlocks + 1] ),
@@ -26,7 +23,6 @@ SLPool::SLPool( size_t poolSz ) :
 {
     mp_Pool[0].mui_Length = mui_NumberOfBlocks;
     mp_Pool[0].mp_Next = nullptr;
-    
     mr_Sentinel.mp_Next = &mp_Pool[0];
     mr_Sentinel.mui_Length = 0;
 }
@@ -136,7 +132,7 @@ void * SLPool::Allocate( size_t numberOfBytes )
         throw exception;
     }
     
-    
+    // Case where the first big enough area found is exactly the size asked.
     if( best_ptr->mui_Length == numberOfBlocks )
     {
         best_ptr_prev->mp_Next = best_ptr->mp_Next;

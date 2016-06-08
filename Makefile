@@ -33,7 +33,7 @@ INCFLAG = -I $(INCDIR)
 LFLAGS = $(DEBUG) $(WARN) $(INCFLAG) 
 #$(LIBFLAG)
 # COMPILATION FLAGS
-CFLAGS = $(DEBUG) -c $(WARN) -std=c++11
+CFLAGS = $(DEBUG) -c $(WARN) -std=c++11 -O3
 
 # ----------------------
 # ENTRIES
